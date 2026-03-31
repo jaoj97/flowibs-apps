@@ -14,25 +14,92 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: center;
             padding: 60px 20px;
         }
-        h1 {
-            font-size: 2rem;
+        /* Login screen */
+        .login-screen {
+            text-align: center;
+            max-width: 360px;
+            width: 100%;
+        }
+        .login-screen h1 {
+            font-size: 1.8rem;
             font-weight: 300;
             margin-bottom: 8px;
-            color: #ffffff;
+            color: #fff;
         }
-        .subtitle {
-            color: #888;
-            margin-bottom: 48px;
+        .login-screen .subtitle {
+            color: #666;
+            margin-bottom: 32px;
+            font-size: 0.85rem;
+        }
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .login-form input {
+            background: #161616;
+            border: 1px solid #2a2a2a;
+            border-radius: 8px;
+            padding: 14px 16px;
+            color: #fff;
             font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
         }
+        .login-form input:focus {
+            border-color: #D9FC67;
+        }
+        .login-form button {
+            background: #D9FC67;
+            color: #0a0a0a;
+            border: none;
+            border-radius: 8px;
+            padding: 14px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+        .login-form button:hover { opacity: 0.85; }
+        .login-error {
+            color: #ff6b6b;
+            font-size: 0.8rem;
+            margin-top: 4px;
+            min-height: 20px;
+        }
+        /* Dashboard */
+        .dashboard { display: none; width: 100%; max-width: 900px; }
+        .dashboard.active { display: block; }
+        .login-screen.hidden { display: none; }
+        .dash-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 48px;
+        }
+        .dash-header h1 {
+            font-size: 2rem;
+            font-weight: 300;
+            color: #fff;
+        }
+        .dash-header .logout {
+            background: none;
+            border: 1px solid #333;
+            color: #888;
+            padding: 8px 16px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: border-color 0.2s, color 0.2s;
+        }
+        .dash-header .logout:hover { border-color: #666; color: #ccc; }
         .apps-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
-            max-width: 900px;
-            width: 100%;
         }
         .app-card {
             background: #161616;
@@ -67,14 +134,75 @@
     </style>
 </head>
 <body>
-    <h1>FLOW IBS Apps</h1>
-    <p class="subtitle">Herramientas internas</p>
-    <div class="apps-grid">
-        <a href="/brand-kit-visualizer/" class="app-card">
-            <h2>Brand Kit Visualizer</h2>
-            <p>Visualiza y previsualiza brand kits completos: paleta de colores, tipografia, botones y mockups.</p>
-            <span class="arrow">Abrir &rarr;</span>
-        </a>
+    <div class="login-screen" id="loginScreen">
+        <h1>FLOW IBS</h1>
+        <p class="subtitle">Acceso restringido</p>
+        <div class="login-form">
+            <input type="password" id="passwordInput" placeholder="Contrasena" autocomplete="off">
+            <button onclick="checkPassword()">Entrar</button>
+            <div class="login-error" id="loginError"></div>
+        </div>
     </div>
+
+    <div class="dashboard" id="dashboard">
+        <div class="dash-header">
+            <div>
+                <h1>FLOW IBS Apps</h1>
+                <p style="color:#666;font-size:0.85rem;margin-top:4px;">Herramientas internas</p>
+            </div>
+            <button class="logout" onclick="logout()">Cerrar sesion</button>
+        </div>
+        <div class="apps-grid">
+            <a href="/flowbrand/" class="app-card">
+                <h2>FlowBrand</h2>
+                <p>Visualiza y previsualiza brand kits completos: paleta de colores, tipografia, botones y mockups.</p>
+                <span class="arrow">Abrir &rarr;</span>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        var h = 'a3e0f8c1b7d4e9f2a6c3d8e5f1b7a4c9';
+        function simpleHash(s) {
+            var hash = 0;
+            for (var i = 0; i < s.length; i++) {
+                var c = s.charCodeAt(i);
+                hash = ((hash << 5) - hash) + c;
+                hash |= 0;
+            }
+            return hash.toString(16);
+        }
+        var correctHash = simpleHash('guatemalita502');
+
+        function checkPassword() {
+            var input = document.getElementById('passwordInput').value;
+            if (simpleHash(input) === correctHash) {
+                sessionStorage.setItem('fi_auth', '1');
+                showDashboard();
+            } else {
+                document.getElementById('loginError').textContent = 'Contrasena incorrecta';
+                document.getElementById('passwordInput').value = '';
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('dashboard').classList.add('active');
+        }
+
+        function logout() {
+            sessionStorage.removeItem('fi_auth');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('dashboard').classList.remove('active');
+            document.getElementById('passwordInput').value = '';
+            document.getElementById('loginError').textContent = '';
+        }
+
+        document.getElementById('passwordInput').addEventListener('keydown', function(e) {
+            if (e.key === 'Enter') checkPassword();
+        });
+
+        if (sessionStorage.getItem('fi_auth') === '1') showDashboard();
+    </script>
 </body>
 </html>
